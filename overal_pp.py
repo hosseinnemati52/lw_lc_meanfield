@@ -283,22 +283,30 @@ def data_saver(matrix, file_name):
 def beta_aff_norm_plotter_both():
     
     plt.figure()
-    for lw_ind in [0,1,2,3,4,8]:
-        lw = float(lw_list[lw_ind])
-        file_name = "pp_data/"+"beta_norm_W_"+str(lw_ind)+".csv"
-        data_load = np.loadtxt(file_name, delimiter=',')
-        x_plot = data_load[0,:]
-        y_avg  = data_load[1,:]
-        y_err  = data_load[2,:]
-        y_upper = y_avg+y_err
-        y_lower = y_avg-y_err
-        label = 'lw='+str(lw)
-        plt.plot(x_plot, y_avg, label=label, linestyle='--')
-        plt.fill_between(x_plot, y_lower, y_upper, alpha=0.2)
+    
+    lw_ind_plot_list = [0,1,2,3,4]
+    lw_ind_plot_list.append(len(lw_list)-1)
+    for lw_ind in lw_ind_plot_list:
+        try:
+            lw = float(lw_list[lw_ind])
+            file_name = "pp_data/"+"beta_norm_W_"+str(lw_ind)+".csv"
+            data_load = np.loadtxt(file_name, delimiter=',')
+            x_plot = data_load[0,:]
+            y_avg  = data_load[1,:]
+            y_err  = data_load[2,:]
+            y_upper = y_avg+y_err
+            y_lower = y_avg-y_err
+            label = 'lw='+str(lw)
+            plt.plot(x_plot, y_avg, label=label, linestyle='--')
+            plt.fill_between(x_plot, y_lower, y_upper, alpha=0.2)
+        except:
+            continue
     
         
-        
-    for lc_ind in [0,1,2,3,4]:
+    lc_ind_plot_list = [0,1,2,3]
+    lc_ind_plot_list.append(len(lc_list)-1)
+    for lc_ind in lc_ind_plot_list:
+        try:
             lc = float(lc_list[lc_ind])
             file_name = "pp_data/"+"beta_norm_C_"+str(lc_ind)+".csv"
             data_load = np.loadtxt(file_name, delimiter=',')
@@ -310,6 +318,8 @@ def beta_aff_norm_plotter_both():
             label = 'lc='+str(lc)
             plt.plot(x_plot, y_avg, label=label)
             plt.fill_between(x_plot, y_lower, y_upper, alpha=0.2)
+        except:
+            continue
     
     plt.plot(x_plot, 1.0+0*x_plot, linestyle='dashdot', color='k')
     plt.plot(x_plot, 0.0+0*x_plot, linestyle='dashdot', color='k')
@@ -477,7 +487,7 @@ for lw_ind in range(len(lw_list)):
             A_c_a_stack = np.vstack([A_c_a_stack, A_c_a_sample])
             
             
-            
+            # print(folder_name)
             
             beta_w_aff_mat = np.loadtxt(address+"/data/"+'beta_w_aff_mat.txt',  delimiter=',')
             beta_c_aff_mat = np.loadtxt(address+"/data/"+'beta_c_aff_mat.txt',  delimiter=',')
