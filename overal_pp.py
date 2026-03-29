@@ -359,11 +359,16 @@ n_samples = int(np.loadtxt("n_samples.txt", delimiter=','))
 cost_data_avg = np.zeros((len(lw_list), len(lc_list)))
 cost_data_err = np.zeros((len(lw_list), len(lc_list)))
 
-deriv_cost_data_avg = np.zeros((len(lw_list), len(lc_list)))
-deriv_cost_data_err = np.zeros((len(lw_list), len(lc_list)))
+main_cost_data_w_avg = np.zeros((len(lw_list), len(lc_list)))
+main_cost_data_c_avg = np.zeros((len(lw_list), len(lc_list)))
+main_cost_data_w_err = np.zeros((len(lw_list), len(lc_list)))
+main_cost_data_c_err = np.zeros((len(lw_list), len(lc_list)))
 
-curv_cost_data_avg = np.zeros((len(lw_list), len(lc_list)))
-curv_cost_data_err = np.zeros((len(lw_list), len(lc_list)))
+deriv_cost_data_w_avg = np.zeros((len(lw_list), len(lc_list)))
+deriv_cost_data_c_avg = np.zeros((len(lw_list), len(lc_list)))
+deriv_cost_data_w_err = np.zeros((len(lw_list), len(lc_list)))
+deriv_cost_data_c_err = np.zeros((len(lw_list), len(lc_list)))
+
 
 b_w_data_avg = np.zeros((len(lw_list), len(lc_list)))
 b_w_data_err = np.zeros((len(lw_list), len(lc_list)))
@@ -430,17 +435,29 @@ for lw_ind in range(len(lw_list)):
         A_c_a_stack = np.empty((0,len(time)))
         
         
-        cost_list = []
+        cost_list = [] # total cost
         cost_list.clear()
         cost_list = []
         
-        deriv_cost_list = []
-        deriv_cost_list.clear()
-        deriv_cost_list = []
+        # cost details
+        main_cost_list_w = []
+        main_cost_list_w.clear()
+        main_cost_list_w = []
         
-        curv_cost_list = []
-        curv_cost_list.clear()
-        curv_cost_list = []
+        deriv_cost_list_w = []
+        deriv_cost_list_w.clear()
+        deriv_cost_list_w = []
+        
+        main_cost_list_c = []
+        main_cost_list_c.clear()
+        main_cost_list_c = []
+        
+        deriv_cost_list_c = []
+        deriv_cost_list_c.clear()
+        deriv_cost_list_c = []
+        # cost details
+        
+        
         
         b_w_list = []
         b_w_list.clear()
@@ -475,6 +492,32 @@ for lw_ind in range(len(lw_list)):
             GD_log_data = np.loadtxt(address+"/GD_log.csv", delimiter=',')
             cost = GD_log_data[-1, 0]
             cost_list.append(cost)
+            
+            #reading details of cost
+            with open(address+"/cost_log.txt", 'r') as f:
+                content = f.read()
+            
+            # Split into blocks using the separator
+            blocks = content.strip().split('--------')
+            
+            # Take the last non-empty block
+            last_block = blocks[-1].strip()
+            if last_block == '':
+                last_block = blocks[-2].strip()
+            
+            # Split lines and convert to float
+            cost_detail_data = []
+            for line in last_block.splitlines():
+                if line.strip():  # skip empty lines
+                    numbers = list(map(float, line.split()))
+                    cost_detail_data.append(numbers)
+            cost_detail_data=np.array(cost_detail_data)
+            
+            main_cost_list_w.append(cost_detail_data[0,0])
+            main_cost_list_c.append(cost_detail_data[1,0])
+            deriv_cost_list_w.append(cost_detail_data[0,1])
+            deriv_cost_list_c.append(cost_detail_data[1,1])
+            #reading details of cost
             
             A_w_sample = np.loadtxt(address+"/data/"+"A_w_mat.txt", delimiter=',')
             A_w_stack = np.vstack([A_w_stack, A_w_sample])
@@ -688,6 +731,16 @@ for lw_ind in range(len(lw_list)):
         cost_data_avg[lw_ind, lc_ind] = cost_avg
         cost_data_err[lw_ind, lc_ind] = cost_err
         
+        main_cost_data_w_avg[lw_ind, lc_ind] = np.mean(main_cost_list_w)
+        main_cost_data_w_err[lw_ind, lc_ind] = np.std(main_cost_list_w)/np.sqrt(n_samples-1)
+        deriv_cost_data_w_avg[lw_ind, lc_ind] = np.mean(deriv_cost_list_w)
+        deriv_cost_data_w_err[lw_ind, lc_ind] = np.std(deriv_cost_list_w)/np.sqrt(n_samples-1)
+        
+        main_cost_data_c_avg[lw_ind, lc_ind] = np.mean(main_cost_list_c)
+        main_cost_data_c_err[lw_ind, lc_ind] = np.std(main_cost_list_c)/np.sqrt(n_samples-1)
+        deriv_cost_data_c_avg[lw_ind, lc_ind] = np.mean(deriv_cost_list_c)
+        deriv_cost_data_c_err[lw_ind, lc_ind] = np.std(deriv_cost_list_c)/np.sqrt(n_samples-1)
+        
         # deriv_cost_avg = np.mean(deriv_cost_list)
         # deriv_cost_err = np.std(deriv_cost_list)/np.sqrt(n_samples-1)
         # deriv_cost_data_avg[lw_ind, lc_ind] = deriv_cost_avg
@@ -790,26 +843,30 @@ try:
 except:
     pass
     
-    data_saver(cost_data_avg, "cost_data_avg.csv")
-    data_saver(cost_data_err, "cost_data_err.csv")
-    
-    data_saver(deriv_cost_data_avg, "deriv_cost_data_avg.csv")
-    data_saver(deriv_cost_data_err, "deriv_cost_data_err.csv")
-    
-    data_saver(curv_cost_data_avg, "curv_cost_data_avg.csv")
-    data_saver(curv_cost_data_err, "curv_cost_data_err.csv")
-    
-    data_saver(b_w_data_avg, "b_w_data_avg.csv")
-    data_saver(b_w_data_err, "b_w_data_err.csv")
-    
-    data_saver(b_c_data_avg, "b_c_data_avg.csv")
-    data_saver(b_c_data_err, "b_c_data_err.csv")
-    
-    # data_saver(tau_w_data_avg, "tau_w_data_avg.csv")
-    # data_saver(tau_w_data_err, "tau_w_data_err.csv")
-    
-    # data_saver(tau_c_data_avg, "tau_c_data_avg.csv")
-    # data_saver(tau_c_data_err, "tau_c_data_err.csv")
+data_saver(cost_data_avg, "cost_data_avg.csv")
+data_saver(cost_data_err, "cost_data_err.csv")
+
+data_saver(main_cost_data_w_avg, "main_cost_data_w_avg.csv")
+data_saver(main_cost_data_w_err, "main_cost_data_w_err.csv")
+data_saver(deriv_cost_data_w_avg, "deriv_cost_data_w_avg.csv")
+data_saver(deriv_cost_data_w_err, "deriv_cost_data_w_err.csv")
+
+data_saver(main_cost_data_c_avg, "main_cost_data_c_avg.csv")
+data_saver(main_cost_data_c_err, "main_cost_data_c_err.csv")
+data_saver(deriv_cost_data_c_avg, "deriv_cost_data_c_avg.csv")
+data_saver(deriv_cost_data_c_err, "deriv_cost_data_c_err.csv")
+
+data_saver(b_w_data_avg, "b_w_data_avg.csv")
+data_saver(b_w_data_err, "b_w_data_err.csv")
+
+data_saver(b_c_data_avg, "b_c_data_avg.csv")
+data_saver(b_c_data_err, "b_c_data_err.csv")
+
+# data_saver(tau_w_data_avg, "tau_w_data_avg.csv")
+# data_saver(tau_w_data_err, "tau_w_data_err.csv")
+
+# data_saver(tau_c_data_avg, "tau_c_data_avg.csv")
+# data_saver(tau_c_data_err, "tau_c_data_err.csv")
 
 np.savetxt("pp_data/"+"lw_list.csv", X=lw_list, fmt='%.5e', delimiter=' , ')
 np.savetxt("pp_data/"+"lc_list.csv", X=lc_list, fmt='%.5e', delimiter=' , ')
@@ -838,31 +895,33 @@ beta_a_norm_plotter_W(beta_w_a_norm_dict, "W")
 
 # sdiuysgd
 
-# plot b_w_tot
-plt.figure()
-plt.errorbar(lw_list, y=b_w_tot_avg-b_w_tot_avg[-1], yerr = b_w_tot_err, label='tot_avg', color='k',markersize=5, fmt='o')
-plt.xlabel("l_w", fontsize=15)
-plt.ylabel(r"$\overline{b_w}$", fontsize=15)
+# # plot b_w_tot
+# plt.figure()
+# # plt.errorbar(lw_list, y=b_w_tot_avg-b_w_tot_avg[-1], yerr = b_w_tot_err, label='tot_avg', color='k',markersize=5, fmt='o')
+# plt.errorbar(lw_list, y=b_w_tot_avg, yerr = b_w_tot_err, label='tot_avg', color='k',markersize=5, fmt='o')
+# plt.xlabel("l_w", fontsize=15)
+# plt.ylabel(r"$\overline{b_w}$", fontsize=15)
+# # plt.yscale("log")
+# plt.xscale("log")
 # plt.yscale("log")
-plt.xscale("log")
-plt.yscale("log")
-plt.grid()
-plt.tight_layout()
-plt.savefig("b_w_tot_avg.PNG", dpi=300)
-# plot b_w_tot
+# plt.grid()
+# plt.tight_layout()
+# plt.savefig("b_w_tot_avg.PNG", dpi=300)
+# # plot b_w_tot
 
-# plot b_c_tot
-plt.figure()
-plt.errorbar(lc_list, y=b_c_tot_avg-b_c_tot_avg[-1], yerr = b_c_tot_err, label='tot_avg', color='k',markersize=5, fmt='o')
-plt.xlabel("l_c", fontsize=15)
-plt.ylabel(r"$\overline{b_c}$", fontsize=15)
+# # plot b_c_tot
+# plt.figure()
+# # plt.errorbar(lc_list, y=b_c_tot_avg-b_c_tot_avg[-1], yerr = b_c_tot_err, label='tot_avg', color='k',markersize=5, fmt='o')
+# plt.errorbar(lc_list, y=b_c_tot_avg, yerr = b_c_tot_err, label='tot_avg', color='k',markersize=5, fmt='o')
+# plt.xlabel("l_c", fontsize=15)
+# plt.ylabel(r"$\overline{b_c}$", fontsize=15)
+# # plt.yscale("log")
+# plt.xscale("log")
 # plt.yscale("log")
-plt.xscale("log")
-plt.yscale("log")
-plt.grid()
-plt.tight_layout()
-plt.savefig("b_c_tot_avg.PNG", dpi=300)
-# plot b_c_tot
+# plt.grid()
+# plt.tight_layout()
+# plt.savefig("b_c_tot_avg.PNG", dpi=300)
+# # plot b_c_tot
 
 
 # plot cost
@@ -878,6 +937,8 @@ plt.grid()
 plt.tight_layout()
 plt.savefig("cost.PNG", dpi=300)
 # plot cost
+
+
 
 # plot b_w-b_w_terminal (avg)
 plt.figure()
