@@ -938,9 +938,52 @@ plt.tight_layout()
 plt.savefig("cost.PNG", dpi=300)
 # plot cost
 
+# plot cost components
+fig, axs = plt.subplots(2, 2, figsize=(8, 6))
+# Top-left
+for i in range(len(lc_list)):
+    label = 'lc = '+str(lc_list[i])
+    axs[0, 0].errorbar(lw_list, y=main_cost_data_w_avg[:,i], yerr = main_cost_data_w_err[:,i], label=label)
+axs[0, 0].set_title("main, w")
+axs[0, 0].set_xlabel("l_w", fontsize=15)
+axs[0, 0].set_ylabel("cost", fontsize=15)
+axs[0, 0].set_xscale("log")
+axs[0, 0].grid()
+# Top-right
+for i in range(len(lc_list)):
+    label = 'lc = '+str(lc_list[i])
+    axs[0, 1].errorbar(lw_list, y=main_cost_data_c_avg[:,i], yerr = main_cost_data_c_err[:,i], label=label)
+axs[0, 1].set_title("main, c")
+axs[0, 1].set_xlabel("l_w", fontsize=15)
+axs[0, 1].set_ylabel("cost", fontsize=15)
+axs[0, 1].set_xscale("log")
+axs[0, 1].grid()
+# Bottom-left
+for i in range(len(lc_list)):
+    label = 'lc = '+str(lc_list[i])
+    axs[1, 0].errorbar(lw_list, y=deriv_cost_data_w_avg[:,i], yerr = deriv_cost_data_w_err[:,i], label=label)
+axs[1, 0].set_title("deriv, w")
+axs[1, 0].set_xlabel("l_w", fontsize=15)
+axs[1, 0].set_ylabel("cost", fontsize=15)
+axs[1, 0].set_xscale("log")
+axs[1, 0].grid()
+# Bottom-right
+for i in range(len(lc_list)):
+    label = 'lc = '+str(lc_list[i])
+    axs[1, 1].errorbar(lw_list, y=deriv_cost_data_c_avg[:,i], yerr = deriv_cost_data_c_err[:,i], label=label)
+axs[1, 1].set_title("deriv, c")
+axs[1, 1].set_xlabel("l_w", fontsize=15)
+axs[1, 1].set_ylabel("cost", fontsize=15)
+axs[1, 1].set_xscale("log")
+axs[1, 1].grid()
+# Adjust layout
+plt.tight_layout()
+plt.legend()
+plt.savefig("cost_details.PNG", dpi=400)
+# plot cost components
 
 
-# plot b_w-b_w_terminal (avg)
+# plot cost avg
 plt.figure()
 max_vals = np.max(cost_data_avg + cost_data_err, axis=1)
 min_vals = np.min(cost_data_avg - cost_data_err, axis=1)
@@ -965,7 +1008,7 @@ plt.xscale("log")
 plt.grid()
 plt.tight_layout()
 plt.savefig("cost_avg.PNG", dpi=300)
-# plot b_w-b_w_terminal (avg)
+# plot cost avg
 
 
 # # plot cost
