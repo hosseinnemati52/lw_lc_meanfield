@@ -2,8 +2,10 @@
 set -euo pipefail
 
 # ---- CONFIGURATION ----
-# Define your list (can be any values)
-i_list=({1..10})   # expands to 1 2 3 ... 10
+read -r N < ../n_samples.txt
+
+# Define your list dynamically
+i_list=($(seq 1 "$N"))
 
 # ---- MAIN LOOP ----
 for i in "${i_list[@]}"; do

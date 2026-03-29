@@ -19,6 +19,7 @@ from scipy.stats import linregress
 import json
 import subprocess
 from scipy.interpolate import UnivariateSpline
+import time as time_package
 
 def beta_a_norm_plotter_C(beta_a_norm_dict, celltype): # Works only for type C
     
@@ -351,7 +352,8 @@ with open("lw_lc_lists.sh", "r") as f:
 
 
 
-n_samples = 10
+#n_samples = 10
+n_samples = int(np.loadtxt("n_samples.txt", delimiter=','))
 
 
 cost_data_avg = np.zeros((len(lw_list), len(lc_list)))
@@ -542,7 +544,17 @@ for lw_ind in range(len(lw_list)):
             # tau_c_list.append(tau_c)
             # b_w, b_c, tau_w, tau_c
             
-            
+        
+        # # plot b_w, b_c histograms
+        # plt.figure()
+        # plt.hist(b_w_list)
+        # plt.title('b_w')
+        
+        # plt.figure()
+        # plt.hist(b_c_list)
+        # plt.title('b_c')
+        # # plot b_w, b_c histograms
+        
         A_w_norm_stack = A_w_stack / A_w_stack[:, [0]]
         A_c_norm_stack = A_c_stack / A_c_stack[:, [0]]
         
@@ -708,27 +720,30 @@ for lw_ind in range(len(lw_list)):
 
 
 # plot W_v(t)/C_a(t) for sample lc, lw
-selected_keys = [(3,0), (3,1), (3,4)] #lw=30; lc=11,33,1100
-plt.figure()
-title = 'all for lw=30'
-for key in selected_keys:
-    
-    x_plot = W_v_to_C_a_dict[key][0,:]
-    y_avg = W_v_to_C_a_dict[key][1,:]
-    y_err = W_v_to_C_a_dict[key][2,:]
-    y_upper = y_avg+y_err
-    y_lower = y_avg-y_err
-    label = 'lc='+str(lc_list[key[1]])
-    plt.plot(x_plot, y_avg, label = label)
-    plt.fill_between(x_plot, y_lower, y_upper, alpha=0.2)
-plt.title(title)
-plt.xlabel("t (h)")
-plt.ylabel(r"$W^v(t)/C^a(t)$")
-plt.grid()
-plt.legend()
-plt.tight_layout()
-plt.savefig("W_v_to_C_a.PNG", dpi=300)
-plt.close()
+try:
+    selected_keys = [(3,0), (3,1), (3,4)] #lw=30; lc=11,33,1100
+    plt.figure()
+    title = 'all for lw=30'
+    for key in selected_keys:
+        
+        x_plot = W_v_to_C_a_dict[key][0,:]
+        y_avg = W_v_to_C_a_dict[key][1,:]
+        y_err = W_v_to_C_a_dict[key][2,:]
+        y_upper = y_avg+y_err
+        y_lower = y_avg-y_err
+        label = 'lc='+str(lc_list[key[1]])
+        plt.plot(x_plot, y_avg, label = label)
+        plt.fill_between(x_plot, y_lower, y_upper, alpha=0.2)
+    plt.title(title)
+    plt.xlabel("t (h)")
+    plt.ylabel(r"$W^v(t)/C^a(t)$")
+    plt.grid()
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig("W_v_to_C_a.PNG", dpi=300)
+    plt.close()
+except:
+    pass
 # plot W_v(t)/C_a(t) for sample lc, lw
 
 b_w_difference_avg = np.zeros((len(lw_list), len(lc_list)))
@@ -953,6 +968,8 @@ plt.savefig("b_w_difference.PNG", dpi=300)
 # plot b_w-b_w_terminal
 
 
+
+
 # plot b_w-b_w_terminal (avg)
 plt.figure()
 max_vals = np.max(b_w_difference_avg + b_w_difference_err, axis=1)
@@ -965,10 +982,13 @@ log_y = np.log10(np.mean(b_w_difference_avg, axis=1))
 log_sig = err_vals / (np.log(10) * np.mean(b_w_difference_avg, axis=1)) 
 w = 1 / log_sig**2
 max_index = 7
-coef = np.polyfit(log_x[0:max_index], log_y[0:max_index], deg=1, w=w[0:max_index])   # highest power first
-lw_fit_plot = np.linspace(lw_list[0], lw_list[max_index], 1000)
-bw_diff_fit_plot = (lw_fit_plot**coef[0])*(10**coef[1])
-plt.plot(lw_fit_plot, bw_diff_fit_plot, color='r', linestyle='--')
+try:
+    coef = np.polyfit(log_x[0:max_index], log_y[0:max_index], deg=1, w=w[0:max_index])   # highest power first
+    lw_fit_plot = np.linspace(lw_list[0], lw_list[max_index], 1000)
+    bw_diff_fit_plot = (lw_fit_plot**coef[0])*(10**coef[1])
+    plt.plot(lw_fit_plot, bw_diff_fit_plot, color='r', linestyle='--')
+except:
+    pass
 plt.legend(fontsize=10)
 plt.xlabel("l_w", fontsize=15)
 plt.ylabel("b_w_difference (avg)", fontsize=15)
@@ -1041,10 +1061,13 @@ log_y = np.log10(np.mean(b_c_data_avg, axis=0))
 log_sig = err_vals / (np.log(10) * np.mean(b_c_data_avg, axis=0))
 w = 1 / log_sig**2
 max_index = 3
-coef = np.polyfit(log_x[0:max_index], log_y[0:max_index], deg=1, w=w[0:max_index])   # highest power first
-lc_fit_plot = np.linspace(lc_list[0], lc_list[max_index], 1000)
-bc_fit_plot = (lc_fit_plot**coef[0])*(10**coef[1])
-plt.plot(lc_fit_plot, bc_fit_plot, color='r', linestyle='--')
+try:
+    coef = np.polyfit(log_x[0:max_index], log_y[0:max_index], deg=1, w=w[0:max_index])   # highest power first
+    lc_fit_plot = np.linspace(lc_list[0], lc_list[max_index], 1000)
+    bc_fit_plot = (lc_fit_plot**coef[0])*(10**coef[1])
+    plt.plot(lc_fit_plot, bc_fit_plot, color='r', linestyle='--')
+except:
+    pass
 plt.legend(fontsize=10)
 plt.xlabel("l_c", fontsize=15)
 plt.ylabel("b_c (avg)", fontsize=15)
@@ -1088,10 +1111,13 @@ log_sig = err_vals / (np.log(10) * np.mean(b_c_difference_avg, axis=0))
 w = 1 / log_sig**2
 min_index = 2
 max_index = 4
-coef = np.polyfit(log_x[min_index:max_index], log_y[min_index:max_index], deg=1, w=w[min_index:max_index])   # highest power first
-lc_fit_plot = np.linspace(lc_list[min_index], lc_list[max_index], 1000)
-bc_diff_fit_plot = (lc_fit_plot**coef[0])*(10**coef[1])
-plt.plot(lc_fit_plot, bc_diff_fit_plot, color='r', linestyle='--')
+try:
+    coef = np.polyfit(log_x[min_index:max_index], log_y[min_index:max_index], deg=1, w=w[min_index:max_index])   # highest power first
+    lc_fit_plot = np.linspace(lc_list[min_index], lc_list[max_index], 1000)
+    bc_diff_fit_plot = (lc_fit_plot**coef[0])*(10**coef[1])
+    plt.plot(lc_fit_plot, bc_diff_fit_plot, color='r', linestyle='--')
+except:
+    pass
 plt.legend(fontsize=10)
 plt.xlabel("l_c", fontsize=15)
 plt.ylabel("b_c_difference (avg)", fontsize=15)
@@ -1148,3 +1174,15 @@ plt.savefig("b_c_ratio.PNG", dpi=300)
 # # plot tau_w
 
 beta_aff_norm_plotter_both()
+
+
+time_package.sleep(5)
+script = "folder_zipper.sh"
+title = "folder_zipper"
+# Run script in a new terminal window
+subprocess.run([
+"gnome-terminal",
+"--title=" + title,
+"--", "bash", "-c",
+f"./{script}; exec bash"
+])

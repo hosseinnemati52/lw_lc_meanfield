@@ -38,15 +38,30 @@ C_mix_fit_smples_coefs = np.loadtxt("C_mix_fit_smples_coefs.csv", delimiter=',')
 a_list = W_mix_fit_smples_coefs[0,:]
 b_list = W_mix_fit_smples_coefs[1,:]
 c_list = W_mix_fit_smples_coefs[2,:]
+
+random_sample_ind_w = np.random.randint(np.shape(W_mix_fit_smples_coefs)[1])
+target_a = a_list[random_sample_ind_w]
+target_b = b_list[random_sample_ind_w]
+target_c = c_list[random_sample_ind_w]
+
 d1_mat = np.zeros((len(a_list), len(exp_time)))
 d2_mat = np.zeros((len(a_list), len(exp_time)))
 for i in range(len(a_list)):
     d1_mat[i,:] = 2*a_list[i]*exp_time+b_list[i]
     d2_mat[i,:] = 2*a_list[i]
-discrete_y_d1_avg_exp = np.mean(d1_mat, axis=0)
-discrete_y_d1_err_exp = np.std(d1_mat, axis=0)/np.sqrt(len(a_list))
-discrete_y_d2_avg_exp = np.mean(d2_mat, axis=0)
-discrete_y_d2_err_exp = np.std(d2_mat, axis=0)/np.sqrt(len(a_list))
+    
+# discrete_y_d1_avg_exp = np.mean(d1_mat, axis=0)
+discrete_y_d1_avg_exp = 2*target_a*exp_time+target_b
+# discrete_y_d1_err_exp = np.std(d1_mat, axis=0)/np.sqrt(len(a_list))
+discrete_y_d1_err_exp = np.std(d1_mat, axis=0)
+# discrete_y_d2_avg_exp = np.mean(d2_mat, axis=0)
+discrete_y_d2_avg_exp = 2 * target_a
+# discrete_y_d2_err_exp = np.std(d2_mat, axis=0)/np.sqrt(len(a_list))
+discrete_y_d2_err_exp = np.std(d2_mat, axis=0)
+target_abc_fit = np.array([random_sample_ind_w, target_a, target_b, target_c])
+np.savetxt("target_abc_fit.csv", target_abc_fit, fmt='%.6f', delimiter=',')
+
+
 
 y_d1_w_semi_exp = np.zeros((3,len(exp_time)))
 y_d2_w_semi_exp = np.zeros((3,len(exp_time)))
@@ -75,6 +90,16 @@ L_list  = C_mix_fit_smples_coefs[0,:]
 t0_list = C_mix_fit_smples_coefs[1,:]
 k_list  = C_mix_fit_smples_coefs[2,:]
 y0_list = C_mix_fit_smples_coefs[3,:]
+
+random_sample_ind_c = np.random.randint(np.shape(C_mix_fit_smples_coefs)[1])
+target_L  =  L_list[random_sample_ind_c]
+target_t0 = t0_list[random_sample_ind_c]
+target_k  =  k_list[random_sample_ind_c]
+target_y0 = y0_list[random_sample_ind_c]
+target_coefs_c_fit = np.array([random_sample_ind_c, target_L, target_t0, target_k, target_y0])
+np.savetxt("target_coefs_c_fit.csv", target_coefs_c_fit, fmt='%.6f', delimiter=',')
+
+
 d1_mat = np.zeros((len(L_list), len(exp_time)))
 d2_mat = np.zeros((len(L_list), len(exp_time)))
 for i in range(len(L_list)):
@@ -83,12 +108,18 @@ for i in range(len(L_list)):
     d2_mat[i,:] = k_list[i]*k_list[i]*L_list[i]*expo * (-1+expo) / (1+expo)**3
 d1_mat = d1_mat + beta_c
 
-discrete_y_d1_avg_exp = np.mean(d1_mat, axis=0)
-discrete_y_d1_err_exp = np.std(d1_mat, axis=0)/np.sqrt(len(a_list))
+# discrete_y_d1_avg_exp = np.mean(d1_mat, axis=0)
+expo = np.exp(-target_k*(exp_time-target_t0))
+discrete_y_d1_avg_exp = beta_c + target_k*target_L*expo / (1+expo)**2
+# discrete_y_d1_err_exp = np.std(d1_mat, axis=0)/np.sqrt(len(L_list))
+discrete_y_d1_err_exp = np.std(d1_mat, axis=0)
 discrete_y_d1_err_exp = (discrete_y_d1_err_exp**2 + beta_c_err**2)**0.5
 
-discrete_y_d2_avg_exp = np.mean(d2_mat, axis=0)
-discrete_y_d2_err_exp = np.std(d2_mat, axis=0)/np.sqrt(len(a_list))
+# discrete_y_d2_avg_exp = np.mean(d2_mat, axis=0)
+expo = np.exp(-target_k*(exp_time-target_t0))
+discrete_y_d2_avg_exp = target_k*target_k*target_L*expo * (-1+expo) / (1+expo)**3
+# discrete_y_d2_err_exp = np.std(d2_mat, axis=0)/np.sqrt(len(L_list))
+discrete_y_d2_err_exp = np.std(d2_mat, axis=0)
 
 y_d1_c_semi_exp = np.zeros((3,len(exp_time)))
 y_d2_c_semi_exp = np.zeros((3,len(exp_time)))

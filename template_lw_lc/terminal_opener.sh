@@ -12,9 +12,14 @@ run_file_in_terminal() {
 
 sleep 120
 
-N=10              # Total number of runs from the CSV file
+source ../lw_lc_lists.sh
+len_lw=${#lw_list[@]}
+len_lc=${#lc_list[@]}
+total_num=$((len_lw * len_lc))
+
+read -r N < ../n_samples.txt  # Total number of runs from the txt file
 MAX_TERMINALS=2   # Number of terminals to open at a time
-THRESHOLD=56       # Minimum number of terminals to trigger new batch
+THRESHOLD=$((total_num + 24))     # Minimum number of terminals to trigger new batch
 INTERVAL=60       # Time interval to check in seconds
 started=0         # Counter for started scripts
 
